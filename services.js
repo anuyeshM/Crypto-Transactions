@@ -1,5 +1,6 @@
 const request = require("request");
 const TransactionObj = require('./transactionModel');
+const EtherPriceModelObj = require('./EtherPriceModel');
 
 class Transactions {
   static async getSingleTransactions(Address) {
@@ -21,7 +22,7 @@ class Transactions {
     const transaction = {};
     try {
       if (!Address) {
-        logger.error("Did not receive user id");
+        console.log("Did not receive user id");
         response.status = failure;
         response.statusCode = 400;
         response.message = "Did not receive user id";
@@ -33,10 +34,10 @@ class Transactions {
           const user = await TransactionObj.findOne({ contractAddress: Address })
              if(!user){
                 TransactionObj.create({contractAddress:transaction.result[0].contractAddress})
-                logger.error('User Created');
+                console.log('User Created');
                 }
               else{
-                logger.error('User already exist');
+                console.log('User already exist');
                 response.status = failure;
                 response.statusCode = 400;
                 response.message = 'User already exist';
@@ -50,13 +51,38 @@ class Transactions {
               }
       }
     } catch (error) {
-      logger.error(error.message);
-      logger.error("Error while fetching user...");
+      console.log(error.message);
+      console.log("Error while fetching user...");
       response.status = failure;
       response.statusCode = 400;
       response.message = "Error while fetching user";
     }
     return response;
+  }
+
+  static async getEtherumPrices() {
+
+    async function callApi() {
+      let response = await axios( { url: "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=inr " });
+      console.log("Response:", response.ethereum.inr);
+      RealTimePrice = response.ethereum.inr
+      if(!RealTimePrice){
+        console.log("No RealTimePrice data is there");
+      }
+      else{
+        EtherPriceModelObj.create({contractAddress:transaction.result[0].contractAddress})
+      }
+  } 
+  
+    let i = 0;
+    let idInterval = setInterval(() => {
+      if (i < dataFortheAPI.length) {
+        callApi(dataFortheAPI[i]);
+        i++;
+      } else {
+        clearInterval(idInterval);
+      }
+    }, 22000);
   }
 
 
